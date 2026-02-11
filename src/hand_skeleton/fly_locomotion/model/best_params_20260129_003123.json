@@ -1,0 +1,12 @@
+{
+  "best_params": {
+    "batch_size": 32,
+    "epochs": 50,
+    "early_stopping_patience": 10,
+    "n_layers": 1,
+    "units_layer_0": 224
+  },
+  "best_f1_score": 0.9953650057937428,
+  "test_accuracy": 0.9988412514484357,
+  "test_f1_score": 0.9988410176014705
+}
