@@ -317,7 +317,8 @@ crashlytics-build.properties
 # End of https://www.toptal.com/developers/gitignore/api/python,unity,ros,ros2
 
 /data
+/data_0211
 /unity_app
 /unity_app/
-
 *.h5
+/.vscode

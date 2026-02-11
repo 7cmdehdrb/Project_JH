@@ -30,10 +30,10 @@ for line in txt.readlines():
     data = line.split()
     skeleton_data.append(data[1:])
     if data[0] == "translation":
-        labels.append([0, 1])
+        labels.append([1, 0])
         none += 1
     elif data[0] == "rotation":
-        labels.append([1, 0])
+        labels.append([0, 1])
         pointing += 1
     else:
         labels.append([0, 1])
@@ -72,7 +72,7 @@ history = model.fit(
 loss, accuracy = model.evaluate(skeleton_data, labels)
 print(f"Loss: {loss}, Accuracy: {accuracy}")
 
-model.save("local_model_gpu.h5")
+model.save("local_model_fist_gpu.h5")
 
 history_dict = history.history
 loss = history_dict["loss"][-1]

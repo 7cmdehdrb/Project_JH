@@ -73,7 +73,7 @@ class IntegratedLocomotion(Node):
 
         # --- 1. 설정 및 변수 초기화 ---
         self.model = tf.keras.models.load_model(
-            "/home/min/7cmdehdrb/fuck_flight/local_model_gpu.h5"
+            "/home/min/7cmdehdrb/fuck_flight/local_model_fist_gpu.h5"
         )
 
         # 로코모션 파라미터 (Locomotion.cs에서 가져옴)
@@ -99,14 +99,14 @@ class IntegratedLocomotion(Node):
         # self.player_pos = np.array([5.0, 2.0, 2.0])
 
         # Waypoint 통과
-        # self.player_pos = np.array([-0.98, -7.83, 2.0])
-        # self.player_rot = R.from_quat(
-        #     [0.0, -0.0, 0.7071068286895752, -0.7071068286895752]
-        # )
+        self.player_pos = np.array([-0.98, -7.83, 2.0])
+        self.player_rot = R.from_quat(
+            [0.0, -0.0, 0.7071068286895752, -0.7071068286895752]
+        )
 
         # 매니퓰레이터 찾기
-        self.player_pos = np.array([0.53, 1.9, 2.0])
-        self.player_rot = R.from_quat([0.0, 0.0, 0.707, -0.707])  # Identity
+        # self.player_pos = np.array([0.53, 1.9, 2.0])
+        # self.player_rot = R.from_quat([0.0, 0.0, 0.707, -0.707])  # Identity
 
         # 제스처 필터링용 변수
         self.prediction_window = []

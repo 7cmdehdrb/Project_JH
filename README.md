@@ -52,3 +52,11 @@ random_int_2 = 0 -> 비활성화
 `
 python3 /home/min/7cmdehdrb/fuck_flight/src/fly_locomotion/fly_locomotion/spawn_mani.py
 `
+
+
+# BAG
+`
+timeout 120 ros2 bag record -a -o <EXP-ID>_<METHOD>
+`
+
+METHOD -> gauntlet or proposed or frontier
