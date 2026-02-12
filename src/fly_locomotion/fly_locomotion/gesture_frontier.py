@@ -244,7 +244,6 @@ class IntegratedLocomotion(Node):
             prediction = self.model.predict(skeleton_data, verbose=0)
             # [[0.01455264 0.83905846 0.14638886]] -> [[주먹, 포인팅, NULL]]
             pred_idx = np.argmax(prediction)
-            print(prediction, pred_idx)
 
             # Sliding Window
             window_size = 10
@@ -270,7 +269,6 @@ class IntegratedLocomotion(Node):
                 predicted_label = self.last_prediction
 
             self.last_prediction = predicted_label
-            print(predicted_label)
 
             # 상태 업데이트
             self.is_pointing = predicted_label
@@ -307,7 +305,6 @@ class IntegratedLocomotion(Node):
         }
         lin_vel = speed_map.get(self.is_pointing, 0.0)
 
-        print(self.is_pointing, lin_vel)
         # 24m -> 30초
 
         # 2. 상태 관리: 제스처 활성화 시 initial_wrist_rot 저장
@@ -340,10 +337,6 @@ class IntegratedLocomotion(Node):
             pointing_dir_norm = np.linalg.norm(pointing_dir)
             if pointing_dir_norm > 1e-6:
                 pointing_dir = pointing_dir / pointing_dir_norm
-
-            print(
-                f"Pointing Dir: X: {pointing_dir[0]:.2f}, Y: {pointing_dir[1]:.2f}, Z: {pointing_dir[2]:.2f}"
-            )
 
             # 4. 이동 적용: 손목이 가리키는 방향으로 병진 이동 (회전 없음)
             if lin_vel > 0.0:

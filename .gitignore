@@ -316,9 +316,15 @@ crashlytics-build.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/python,unity,ros,ros2
 
+*.h5
+
 /data
 /data_0211
+/data_0211_unused
 /unity_app
-/unity_app/
-*.h5
+/unity_app
 /.vscode
+
+*.mp4
+*.mp3
+*.wav
