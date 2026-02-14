@@ -28,7 +28,7 @@ class WaypointPosReset(Node):
             "/waypoint_pos_cmd",
             qos_profile=qos_profile_system_default,
         )
-        self.__reset = False
+        self.__reset = True
 
         self.__timer = self.create_timer(1.0, self.publish_reset)
 

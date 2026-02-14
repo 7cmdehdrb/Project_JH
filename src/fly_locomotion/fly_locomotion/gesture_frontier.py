@@ -105,11 +105,10 @@ class IntegratedLocomotion(Node):
 
         # Waypoint 통과
         self.player_pos = np.array([-0.98, -7.83, 2.0])
-        # self.player_rot = R.from_quat([0.0, 0.0, 0.0, 1.0])  # 항상 고정 (identity)
-
-        # 매니퓰레이터 찾기
-        # self.player_pos = np.array([0.53, 1.9, 2.0])
         self.player_rot = R.from_quat([0.0, 0.0, 0.707, -0.707])  # Identity
+
+        self.init_player_pos = self.player_pos.copy()
+        self.init_player_rot = self.player_rot
 
         # 제스처 필터링용 변수
         self.prediction_window = []
@@ -140,6 +139,14 @@ class IntegratedLocomotion(Node):
             qos_profile=qos_profile_system_default,
         )
 
+        self.__ball_cnt_sub = self.create_subscription(
+            Int32,
+            "/ball_count",
+            self.ball_count_callback,
+            qos_profile=qos_profile_system_default,
+        )
+        self.cnt: int = 0
+
         # [Output]
         # timer_callback
         self.sub_player_pose = self.create_subscription(
@@ -164,6 +171,15 @@ class IntegratedLocomotion(Node):
 
         self.last_time = time.time()
         self.dt = 0.01
+
+    def ball_count_callback(self, msg: Int32):
+        """Ball Count 업데이트 및 수집 로직"""
+
+        if self.cnt != msg.data:
+            self.player_pos = self.init_player_pos.copy()
+            self.player_rot = self.init_player_rot
+
+        self.cnt = msg.data
 
     def player_pose_callback(self, msg: PoseStamped):
         position = msg.pose.position
@@ -415,8 +431,8 @@ class IntegratedLocomotion(Node):
         displacement = pointing_dir * lin_vel * dt
         self.player_pos += displacement
 
-        if self.player_pos[2] > 3.5:
-            self.player_pos[2] = 3.5
+        # if self.player_pos[2] > 3.5:
+        #     self.player_pos[2] = 3.5
 
 
 def main(args=None):
