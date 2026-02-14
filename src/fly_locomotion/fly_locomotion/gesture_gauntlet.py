@@ -133,7 +133,7 @@ class IntegratedLocomotion(Node):
             "/wrist_pose_origin",
             self.wrist_origin_callback,
             qos_profile=qos_profile_system_default,
-        )
+        )  # 손목 좌표, 글로벌
 
         self.sub_player_pose = self.create_subscription(
             PoseStamped,
@@ -188,6 +188,7 @@ class IntegratedLocomotion(Node):
         )  # 로깅용 각 변위 발행
 
         self.last_time = time.time()
+<<<<<<< HEAD
 
     def ball_count_callback(self, msg: Int32):
         """Ball Count 업데이트 및 수집 로직"""
@@ -197,6 +198,8 @@ class IntegratedLocomotion(Node):
             self.player_rot = self.init_player_rot
 
         self.cnt = msg.data
+=======
+>>>>>>> c4b46ec23c1a9d48d0b82a39b991800a5f47e4ca
 
     def skeleton_callback(self, msg: PoseArray):
         """제스처 인식 로직"""
@@ -480,6 +483,8 @@ class IntegratedLocomotion(Node):
 
         # 3. 오일러 각도로 변환 (roll, pitch, yaw). 각각 float
         d_roll, d_pitch, d_yaw = delta_q.as_euler("xyz", degrees=False)
+<<<<<<< HEAD
+=======
 
         # 계산된 각도 Publish
         if self.__is_publish:
@@ -488,6 +493,101 @@ class IntegratedLocomotion(Node):
         # ------------------------------------------------------------------
         # 새로운 로직: 각 축별 물리적 한계에 따른 정규화 매핑
         # ------------------------------------------------------------------
+
+        # 출력 벡터 초기화
+        vel_x = 0.0  # Roll: 항상 0.0으로 고정
+        vel_y = 0.0  # Pitch: 상/하 (Radial/Ulnar)
+        vel_z = 0.0  # Yaw: 좌/우 (Flexion/Extension)
+
+        target_speed = self.angular_max_threshold  # 0.255
+
+        """
+        TO. 정재훈
+        PITCH 움직임이 반대로 이동할 경우, 부호를 변경할 것.
+        """
+        # [매핑 1] Pitch (Y축) 출력 계산: 요측/척측 편위
+        # 비율 계산: 현재각도 / 최대각도 (1.0을 넘지 않도록 클램핑)
+        if abs(d_yaw) < self.rotation_threshold:
+            # 데드존 처리
+            vel_y = 0.0
+        elif d_yaw > 0.0:
+            # 상승 로직.
+            ratio = min(abs(d_yaw) / self.max_radial_deviation, 1.0)
+            vel_y = ratio * target_speed  # 양수(+) 방향
+        else:
+            # 하강 로직
+            ratio = min(abs(d_yaw) / self.max_ulnar_deviation, 1.0)
+            vel_y = -1.0 * ratio * target_speed  # 음수(-) 방향
+
+        """
+        TO. 정재훈
+        YAW 움직임이 반대로 이동할 경우, 부호를 변경할 것.
+        """
+        # [매핑 2] Yaw (Z축) 출력 계산: 굴곡/신전 (Flexion/Extension)
+        if abs(d_pitch) < self.rotation_threshold:
+            # 데드존 처리
+            vel_z = 0.0
+        elif d_pitch > 0.0:
+            ratio = min(abs(d_pitch) / self.max_flexion, 1.0)
+            vel_z = -1.0 * ratio * target_speed
+        else:
+            ratio = min(abs(d_pitch) / self.max_extension, 1.0)
+            vel_z = ratio * target_speed
+
+        """
+        TO. 정재훈
+        이 부분은 로컬 좌표계라서, Unity 쪽 좌표계에 맞게 축을 재배치 해야 할 수도 있음.
+        지금 졸려서 머리가 안돌아가는데, 단순하게 순서를 변경하는게 아니라, 축에 맞춰서 threshold나 신전/굴곡/편위를 다시 설정해야 할 수도 있음.
+        ㅠㅠ
+        """
+
+        final_vel = np.array([vel_x, vel_y, vel_z])
+
+        """
+        최종 속도 벡터 조합
+        각 축이 독립적이라, 전체 회전이 self.angular_max_threshold 를 넘길 수 있기 때문에, 전체 벡터 크기에 대한 클램프 적용
+        만약, 각 축에 threshold를 적용하는 것에서 끝나고 싶다면, 위에서 바로 return final_vel 해도 됨.
+        """
+        current_magnitude = np.linalg.norm(final_vel)
+
+        # 만약 현재 속도 벡터의 크기가 최대 제한을 초과한다면
+        if current_magnitude > self.angular_max_threshold:
+            # 방향은 유지한 채 크기만 제한값으로 줄임 (Scaling)
+            scale_factor = self.angular_max_threshold / current_magnitude
+            final_vel = final_vel * scale_factor
+
+        return final_vel
+
+        # --- 예전 코드 ---
+        current_rot = R.from_quat(
+            [
+                self.latest_wrist_pose.orientation.x,
+                self.latest_wrist_pose.orientation.y,
+                self.latest_wrist_pose.orientation.z,
+                self.latest_wrist_pose.orientation.w,
+            ]
+        )
+
+        # 현재 손목의 회전 각도와 초기 손목 회전 각도의 차이 계산
+        delta_q = current_rot * self.initial_wrist_rot.inv()
+
+        # 현재 회전 차이를 오일러 각도로 변환
+        d_roll, d_pitch, d_yaw = delta_q.as_euler("xyz", degrees=False)
+>>>>>>> c4b46ec23c1a9d48d0b82a39b991800a5f47e4ca
+
+        # 계산된 각도 Publish
+        if self.__is_publish:
+            self.pub_angular_disp.publish(Vector3(x=d_roll, y=d_pitch, z=d_yaw))
+
+<<<<<<< HEAD
+        # ------------------------------------------------------------------
+        # 새로운 로직: 각 축별 물리적 한계에 따른 정규화 매핑
+        # ------------------------------------------------------------------
+=======
+        # 여기서부터는 예전 방식 코드임. 위의 코드로 대체됨.
+        rot_vec: np.ndarray = delta_q.as_rotvec()  # 크기가 각도(rad), 방향이 축
+        delta_angle = np.linalg.norm(rot_vec)
+>>>>>>> c4b46ec23c1a9d48d0b82a39b991800a5f47e4ca
 
         # 출력 벡터 초기화
         vel_x = 0.0  # Roll: 항상 0.0으로 고정
@@ -588,12 +688,21 @@ class IntegratedLocomotion(Node):
         roll을 0.0으로 고정했으나, Unity 쪽애서 좌표계가 달라서 다른 축 회전이 고정될 수 있음.
         그럴 경우, pitch나 yaw를 죽이고, roll만 유지하는 방식으로 수정 필요.
         """
+<<<<<<< HEAD
         # roll, pitch, yaw = self.player_rot.as_euler("xyz", degrees=False)
         # self.player_rot = R.from_euler(
         #     "xyz",
         #     [0.0, pitch, yaw],
         #     degrees=False,
         # )
+=======
+        roll, pitch, yaw = self.player_rot.as_euler("xyz", degrees=False)
+        self.player_rot = R.from_euler(
+            "xyz",
+            [0.0, pitch, yaw],
+            degrees=False,
+        )
+>>>>>>> c4b46ec23c1a9d48d0b82a39b991800a5f47e4ca
 
 
 def main(args=None):
